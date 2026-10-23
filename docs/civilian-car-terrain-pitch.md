@@ -728,3 +728,83 @@ existing pitch smoothing, suspension response, server pose/step clearance, and
 render interpolation are unchanged. Pitch approaches level when the sampled
 front and rear terrain heights become equal. Stair blocks, repeated full blocks,
 isolated bumps, half slabs and the return to level require in-game validation.
+
+## Shared suspension and diagonal contacts — 2026-10-22
+
+The current source confirmed several independent defects relevant to the reported
+W123 and diagonal-slope symptoms. `calculateYOffset` cannot detect downward support
+when the query starts inside a collision shape. Current and predicted compression
+were combined, independent axle/side averages could mix longitudinal and lateral
+height differences with missing contacts, and clients applied unconstrained target
+tilt while local drivers were excluded from server tilt interpolation. Suspension
+forces also could not balance the W123: effective gravity is 0.570–0.617 blocks/tick²,
+but four full-compression responses averaged to only 0.055. These are source and
+equation findings; the screenshots do not identify a particular execution branch.
+
+Each wheel now reads collision-shape top faces at its own transformed footprint.
+Support below full extension plus the existing 0.08 tolerance remains unavailable.
+The 0.05 tracking skin still bounds small start overlap. A higher surface intersecting
+the probe is recorded as over-compression, with saturated travel and no current
+support/traction. Its chassis-lift request uses existing compound-body upward
+sweeps, present support and available headroom. Pose lift, suspension lift and the
+raised step retry share the unchanged `StepHeight` budget; wheel overlap alone
+cannot grant a step or teleport the chassis. Body penetration still uses the
+existing bounded recovery. Rejected translations cannot leave predicted wheel
+positions behind.
+
+Terrain orientation jointly fits the available collision heights in the yaw frame,
+using transformed horizontal footprints. The existing center/axle walks and opposite
+axle fallback still bound each adjacent tread change. Two or collinear contacts
+correct only the observed gradient; the unobserved gradient retains the accepted
+pose. Incomplete samples have reduced influence, one contact cannot invent a slope,
+and no contacts retain the existing decay. Independent front/rear and left/right
+averages no longer drive angles. The fit requests pitch and roll only; every wheel
+keeps its own surface and travel. Pitch retains its 45-degree limit, roll its
+18-degree limit, and the server pose solver its two-degree per-tick limit and full
+angular/body clearance checks. `WeightedCenterZ` balance keeps present-contact
+footprints and its missing/level-axle gate.
+
+Both horizontal sweep orders and the diagonal sweep remain. Candidate progress
+now uses projection onto the requested direction: subtracting equal sideways cost
+could give a negative score to valid one-axis progress on a diagonal approach.
+Accepted movement never exceeds either requested component. Supported partial steps
+retain the existing heading-velocity rule; walls, unsupported steps, excessive rise
+and obstructed final poses still use the existing rejection/blocked-axis cleanup.
+
+For positive spring stiffness, per-wheel gravity preload plus a spring deviation
+around half travel balances the configured-wheel average. W123's defined rest is
+0.225 blocks compression, with a net restoring response of ±0.0275 at the travel
+ends under complete support. Damping follows compression rate: compression pushes
+up and rebound damps downward. Partial support carries only its configured share;
+no support leaves gravity intact. No gravity, gearing, drive force, brakes, speed
+limits, vehicle definitions, collider dimensions or travel limits were changed.
+
+Server order is gravity/load measurement, drivetrain/drag, previous suspension
+snapshot/current support and one spring impulse, terrain request, lateral grip,
+accepted pose/lift/body translation, then final wheel measurement/placement. Final
+compression rate compares the previous and accepted body states. Reconciliation
+applies no additional impulse. Client order is previous suspension snapshot,
+server position/tilt interpolation (or position extrapolation), then final wheel
+measurement. Local yaw input stays responsive; rotation indication packets cannot
+overwrite civilian server pitch/roll, and local drivers receive accepted tilt.
+Stationary roll metadata also interpolates when no position correction is pending.
+Packet dispatch continues through the existing owning-thread task queues.
+
+The suspension axis is world vertical for queries, placement and rendering. Render
+translation converts that axis into the interpolated model frame. Authored
+`AddPartWheel` positions remain neutral at half travel; no baseline is learned
+from partial support, slopes or falling. Interpolated compression stays within
+configured travel. W123's ±0.58 collision anchors and approximately ±0.846 model
+wheel pivots retain the existing nearest-wheel matching, as do the inspected
+Starion, BNR32 and low-anchor Chiron layouts.
+
+Validation: offline `compileJava` succeeded with the repository's existing tooling;
+changed production classes use Java 8 bytecode (major 52), and `git diff --check` passed.
+Direct arithmetic checked W123 force averaging, compression/rebound signs, joint
+pitch/roll recovery and inverse render displacement at headings 0/45/90/180/270.
+Source review checked current versus predicted support, travel bounds, missing
+contacts, both collision axes, update ordering and the Forge 1.7.10 side availability
+of shared collision/vector helpers. No new test infrastructure was created.
+Compilation is not gameplay, multiplayer or dedicated-server validation. Uneven
+steps, diagonal climbs and descents at different headings, suspension settling,
+takeoff/landing and local-driver correction still require gameplay feedback.

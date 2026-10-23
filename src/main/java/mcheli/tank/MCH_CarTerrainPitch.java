@@ -10,6 +10,47 @@ final class MCH_CarTerrainPitch {
 
    private MCH_CarTerrainPitch() {}
 
+   /** Joint height gradients in the yaw frame; individual wheel heights remain independent. */
+   static final class Contacts {
+      int count;
+      double x, z, y, xx, xz, zz, xy, zy;
+
+      void add(double px, double pz, double height) {
+         ++count;
+         double dx = px - x, dz = pz - z, dy = height - y;
+         x += dx / count; z += dz / count; y += dy / count;
+         xx += dx * (px - x); xz += dx * (pz - z); zz += dz * (pz - z);
+         xy += dx * (height - y); zy += dz * (height - y);
+      }
+
+      float[] orientation(float previousPitch, float previousRoll) {
+         if(count == 0) return new float[]{Float.NaN, Float.NaN};
+         double pitch = Math.toRadians(previousPitch);
+         double a = Math.tan(Math.toRadians(previousRoll)) / Math.cos(pitch);
+         double b = -Math.tan(pitch);
+         double determinant = xx * zz - xz * xz;
+         double span = xx + zz;
+         if(determinant > 1.0E-8D * span * span) {
+            a = (xy * zz - zy * xz) / determinant;
+            b = (zy * xx - xy * xz) / determinant;
+         } else if(span > 1.0E-8D) {
+            // Two/collinear contacts constrain only one gradient. Correct that
+            // direction, preserving the accepted slope on the unobserved axis.
+            double angle = 0.5D * Math.atan2(2 * xz, xx - zz);
+            double ux = Math.cos(angle), uz = Math.sin(angle);
+            double eigenvalue = ux * ux * xx + 2 * ux * uz * xz + uz * uz * zz;
+            double correction = (ux * (xy - xx * a - xz * b)
+                  + uz * (zy - xz * a - zz * b)) / eigenvalue;
+            a += ux * correction; b += uz * correction;
+         }
+         // R = yaw * pitch * roll, matching RotVec3 and the vehicle renderer.
+         // Its up normal is (-sin(roll), cos(roll)cos(pitch), cos(roll)sin(pitch)).
+         pitch = Math.atan(-b);
+         return new float[]{(float)Math.max(-MAX_PITCH, Math.min(MAX_PITCH, Math.toDegrees(pitch))),
+               (float)Math.max(-18, Math.min(18, Math.toDegrees(Math.atan(a * Math.cos(pitch)))))};
+      }
+   }
+
    /** Missing support is NaN, including an unloaded column, rather than world height zero. */
    static double highestSurface(List<AxisAlignedBB> boxes, AxisAlignedBB column,
          double referenceY, double stepHeight, double clearanceHeight) {

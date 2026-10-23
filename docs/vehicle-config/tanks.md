@@ -32,7 +32,7 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 | `RearTireSize` | same format as `FrontTireSize` | unset | Optional rear tire dimensions, independent of the front. |
 | `CarLateralGrip` | float[0..0.25], blocks/tick² | 0.12 | Server sideways correction limit for opted-in cars; wheel contact scales it. `0` disables lateral grip and its steering coupling. With `DriveType`, lateral demand also reduces available propulsion; propulsion never reduces the existing lateral correction. |
 | `CarMinimumSteering` | float[0..10], degrees/tick | 0 | Optional contact-scaled lower bound on steering yaw authority at speed. Unlike `CarLateralGrip`, it turns the body but does not add sideways force, so excess demand produces understeer. |
-| `SuspensionSpring` | float[0..0.25], blocks/tick² at full compression | 0.055 | Bounded spring acceleration. Used only when `CivilianCarGrip = true`; it is not derived from `Weight`. |
+| `SuspensionSpring` | float[0..0.25], blocks/tick² across full travel | 0.055 | Spring acceleration span around a gravity preload at half travel. Positive values balance the actual downward load with complete support; `0` disables the spring/preload. Used only when `CivilianCarGrip = true`; it is not derived from `Weight`. |
 | `SuspensionCompressionDamping` | float[0..0.25], acceleration per block/tick of compression speed | 0.035 | Shock damping while a supported wheel moves upward into the body. |
 | `SuspensionReboundDamping` | float[0..0.25], acceleration per block/tick of rebound speed | 0.050 | Shock damping while a supported wheel extends; the higher default settles the body after a bump. |
 | `SuspensionTravel` | float[0.05..1.5], blocks | 0.45 | Vertical collision-shape sweep available to each wheel. |
@@ -159,31 +159,43 @@ braking inputs, gearing, steering, brake lights, and collision are unchanged. Br
 to the driven axle. Reaching a traction limit can lower acceleration or attainable speed without changing
 either configured speed ceiling.
 
-Civilian suspension sweeps each individual wheel collision box through `SuspensionTravel`, so full
+Civilian suspension queries each individual wheel collision box through `SuspensionTravel`, so full
 blocks, slabs, stairs, and other collision-box terrain contribute their actual top surface rather than
 a heightmap, entity collision, or paired `onGround` flag. A wheel whose level anchor puts its collision
 bottom below the body floor uses a correction bounded by that wheel's actual collision height. The
 same corrected anchor controls its collision position and travel bounds; authored model positions
 are unchanged. The probe also lifts within a 0.05-block tracking skin and adds exactly that lift to
-the sweep, preserving its lower endpoint and compression reference. Support requires a block collision
-surface underneath the wheel footprint. Both current and next-tick horizontal positions use the same
-current vertical reference, so pending gravity cannot inflate compression. Only supported wheels
-generate spring/damper response; an entirely unsupported car follows normal gravity, falling, body
-collision, and crash-damage behavior. The separate grip query retains its own contact reach and client
-tracking correction.
+the search, preserving its lower endpoint and compression reference (including the existing 0.08
+contact tolerance). Actual top faces are checked even when the probe starts inside a raised shape.
+A surface above full compression and the tracking skin is over-compression: it supplies no traction
+or spring support, and the wheel stays at maximum compression instead of falsely drooping. Any
+required chassis lift goes through the full body collision solver, requires present support, and
+shares the existing `StepHeight` budget with pose and step movement. A wall, ceiling, missing support,
+or excessive rise still rejects movement. Terrain below full extension plus tolerance is unsupported.
+Current and predicted support are separate; only current block contact supplies force, traction and
+stationary balance. No contact query depends on stale wheel placement or paired `onGround` flags.
+
+For positive `SuspensionSpring`, each supported wheel contributes the actual downward gravity load
+plus `SuspensionSpring * (compression / SuspensionTravel - 0.5)` and its damper response. Contributions
+are divided by the configured wheel count, including missing wheels. Complete support therefore
+settles at half travel without changing configured gravity. Partial support carries only its share;
+an entirely unsupported car retains normal gravity, falling, body collision and crash damage. Positive
+compression rate uses compression damping and pushes upward; negative rate uses rebound damping.
 
 Each `AddPartWheel` is matched to the nearest mirrored `SetWheelPos` collision wheel in local X/Z and
-moves vertically with its interpolated compression. Its authored `AddPartWheel` Y position is the
+moves along world vertical with its interpolated compression. Its authored `AddPartWheel` Y position is the
 neutral rendered position; it is not replaced by the collision wheel's `SetWheelPos` Y coordinate.
-The neutral compression is initialized or adjusted only with complete support on one level collision
-surface at the body floor, even compression, and settled body height/pitch/roll. Equal compression on
-a slope, partial contact, or a car still falling through suspension reach cannot establish the baseline.
-The baseline follows settled level compression slowly and snaps the final sub-0.001-block difference to
-that compression, returning rendered travel to zero without removing suspension movement on terrain.
-Body pitch and roll converge every tick, including while stopped, and settle exactly at zero after
-level support is restored. Roll uses supported collision-wheel heights; pitch independently samples
-reachable block collision surfaces at yaw-only wheel locations, so wheel extension and the previous
-pitch do not determine its terrain selection. A match farther than 0.85 blocks is
+Neutral compression is defined as half configured travel and is never learned from terrain. Rendered
+displacement is clamped compression minus that neutral reference, converted from world vertical to
+the interpolated model frame; pitching/rolling the chassis cannot rotate suspension displacement into
+another axis. The server requests pitch and roll from a joint fit of independent reachable terrain
+samples at transformed wheel footprints. Missing samples supply no invented height; incomplete fits
+have reduced influence and collinear contacts preserve the unconstrained accepted gradient. This fit
+only requests orientation: it never puts all wheels onto a common support plane. The existing tread
+walks, opposite-axle staircase fallback, pitch limits, body clearance and two-degree pose limit remain.
+Clients interpolate server-accepted tilt, including the local driver, while retaining local steering.
+Final wheel placement/compression follows that accepted/interpolated body, without a second spring
+impulse. Previous compression belongs to the previous body snapshot. A match farther than 0.85 blocks is
 considered a different/decorative layout and receives the legacy wheel animation without suspension
 translation. This fallback permits model packs to use a different number or arrangement of visible wheels safely.
 The four suspension defaults are written explicitly into bundled `CivilianCarGrip = true` definitions;

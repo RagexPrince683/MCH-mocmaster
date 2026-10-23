@@ -1070,11 +1070,14 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
                && ((mcheli.tank.MCH_EntityTank)ac).getTankInfo() != null
                && ((mcheli.tank.MCH_EntityTank)ac).getTankInfo().civilianCarGrip
                ? ((mcheli.tank.MCH_EntityTank)ac).WheelMng : null;
+         Vec3 suspensionAxis = suspension != null ? suspension.getRenderSuspensionAxis(tickTime) : null;
          while(iterator.hasNext()) {
             MCH_BaseVehicleInfo.PartWheel wheel = (MCH_BaseVehicleInfo.PartWheel)iterator.next();
             GL11.glPushMatrix();
             if(suspension != null) {
-               GL11.glTranslated(0.0D, suspension.getRenderWheelTravel(wheel.pos.xCoord, wheel.pos.zCoord, tickTime), 0.0D);
+               double travel = suspension.getRenderWheelTravel(wheel.pos.xCoord, wheel.pos.zCoord, tickTime);
+               GL11.glTranslated(suspensionAxis.xCoord * travel, suspensionAxis.yCoord * travel,
+                     suspensionAxis.zCoord * travel);
             }
             GL11.glTranslated(wheel.pos2.xCoord, wheel.pos2.yCoord, wheel.pos2.zCoord);
             GL11.glRotated((double)(yaw * wheel.rotDir), wheel.rot.xCoord, wheel.rot.yCoord, wheel.rot.zCoord);

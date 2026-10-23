@@ -427,7 +427,7 @@ public class MCH_BaseVehiclePacketHandler {
             Entity e = player.worldObj.getEntityByID(req.entityID_Ac);
             if(e instanceof MCH_EntityBaseVehicle) {
                MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)e;
-               ac.setRotRoll(req.roll);
+               if(!ac.usesServerTerrainPose()) ac.setRotRoll(req.roll);
                if(req.rollRev) {
                   //System.out.println("req.rollRev");
                   MCH_Lib.DbgLog(ac.worldObj, "onPacketIndRotation Error:req.rollRev y=%.2f, p=%.2f, r=%.2f", new Object[]{Float.valueOf(req.yaw), Float.valueOf(req.pitch), Float.valueOf(req.roll)});
@@ -447,7 +447,7 @@ public class MCH_BaseVehiclePacketHandler {
 
                ac.setRotYaw(req.yaw);
                //System.out.println("yaw changed");
-               ac.setRotPitch(req.pitch);
+               if(!ac.usesServerTerrainPose()) ac.setRotPitch(req.pitch);
                //System.out.println("pitch changed");
             }
 

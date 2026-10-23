@@ -32,8 +32,9 @@ public class MCH_EntityWheel extends W_Entity {
    /** Contact at the present footprint; predicted contact must not balance a stationary car. */
    public boolean suspensionCurrentSupported;
    public boolean suspensionCompressionInitialized;
-   public float suspensionRestCompression = Float.NaN;
    public double suspensionSupportY = Double.NaN;
+   public boolean suspensionPredictedSupported;
+   public double suspensionRequiredLift;
 
 
    public MCH_EntityWheel(World w) {
@@ -78,18 +79,24 @@ public class MCH_EntityWheel extends W_Entity {
    }
 
    /**
-    * Sweeps this wheel's real collision shape down from a body-relative anchor.
-    * Both the current and predicted horizontal positions are tested so a fast car
-    * cannot outrun its contact probe between server ticks.
+    * Measures present support separately from the pending footprint. Prediction
+    * cannot supply current compression, spring force, grip or stationary balance.
     */
    public double measureSuspensionCompression(Vec3 currentAnchor, Vec3 predictedAnchor, double travel) {
       this.suspensionSupportY = Double.NaN;
+      this.suspensionRequiredLift = 0;
       double current = this.measureCompressionAt(currentAnchor, travel);
       this.suspensionCurrentSupported = current >= 0.0D;
+      double supportY = this.suspensionSupportY;
+      double requiredLift = this.suspensionRequiredLift;
       double predicted = currentAnchor == predictedAnchor ? current : this.measureCompressionAt(predictedAnchor, travel);
-      double compression = Math.max(current, predicted);
-      this.suspensionSupported = compression >= 0.0D;
-      return this.suspensionSupported ? compression : 0.0D;
+      this.suspensionPredictedSupported = predicted >= 0.0D;
+      this.suspensionSupportY = supportY;
+      this.suspensionRequiredLift = requiredLift;
+      this.suspensionSupported = this.suspensionCurrentSupported;
+      // Saturation is distinct from droop: an obstructed wheel cannot be placed
+      // below the raised surface as though it had simply lost its contact.
+      return this.suspensionSupported ? current : requiredLift > 0 ? travel : 0.0D;
    }
 
    /** Correct low collision anchors without changing authored model positions or terrain pose. */
@@ -111,21 +118,32 @@ public class MCH_EntityWheel extends W_Entity {
       probe.offset(anchor.xCoord - centerX, anchor.yCoord - this.posY + anchorOffset + lift,
             anchor.zCoord - centerZ);
 
-      // The skin changes only the start; the normalized suspension endpoint stays fixed.
+      // Select real top faces rather than calculateYOffset alone: an overlapping
+      // start box cannot produce a downward hit with that API. Neither the skin
+      // nor overlap recovery extends the lower suspension endpoint.
       double sweep = -(travel + 0.08D + lift);
       List boxes = this.getBlockCollisionBoxes(this, probe.addCoord(0.0D, sweep, 0.0D));
-      double allowed = sweep;
+      double anchorBottom = probe.minY - lift;
+      double highest = Double.NaN;
+      double requiredLift = 0;
       for(int i = 0; i < boxes.size(); ++i) {
-         allowed = ((AxisAlignedBB)boxes.get(i)).calculateYOffset(probe, allowed);
+         AxisAlignedBB box = (AxisAlignedBB)boxes.get(i);
+         if(box.maxX <= probe.minX || box.minX >= probe.maxX
+               || box.maxZ <= probe.minZ || box.minZ >= probe.maxZ) continue;
+         if(box.maxY < anchorBottom - travel - 0.08D - 1.0E-5D) continue;
+         if(box.maxY > anchorBottom + lift + 1.0E-5D) {
+            // This is over-compression, not an unsupported downward sweep. Only
+            // the body solver may lift the chassis, within its existing budget.
+            if(box.minY <= probe.minY + 1.0E-5D)
+               requiredLift = Math.max(requiredLift, box.maxY - anchorBottom);
+            continue;
+         }
+         if(Double.isNaN(highest) || box.maxY > highest) highest = box.maxY;
       }
-      if(allowed <= sweep + 1.0E-5D) {
-         return -1.0D;
-      }
-      double supportY = probe.minY + allowed;
-      if(Double.isNaN(this.suspensionSupportY) || supportY > this.suspensionSupportY) {
-         this.suspensionSupportY = supportY;
-      }
-      return MathHelper.clamp_double(travel + allowed + lift, 0.0D, travel);
+      this.suspensionRequiredLift = requiredLift;
+      this.suspensionSupportY = requiredLift > 0 ? Double.NaN : highest;
+      if(Double.isNaN(this.suspensionSupportY)) return -1.0D;
+      return MathHelper.clamp_double(travel + highest - anchorBottom, 0.0D, travel);
    }
 
    /** Grip-only support sweep. The invisible suspension box is not the rendered tire patch. */
@@ -138,16 +156,12 @@ public class MCH_EntityWheel extends W_Entity {
       double targetBottom = anchor.yCoord + box.minY - this.posY;
       MCH_TankInfo info = this.parents instanceof MCH_EntityTank ? ((MCH_EntityTank)this.parents).getTankInfo() : null;
       if(info != null && info.civilianCarGrip) {
-         // Match suspension's body-relative normalization. Clamping a pitched
-         // rear wheel to the LEVEL chassis floor erases real downhill contact.
-         // A stale wheel below full extension cannot supply traction after takeoff.
-         double anchorBottom = targetBottom + this.getSuspensionAnchorOffset();
-         double queryBottom = Math.max(box.minY, anchorBottom - info.suspensionTravel);
-         double lift = Math.max(0, Math.min(0.05D, targetBottom + box.maxY - box.minY - queryBottom));
-         box.offset(anchor.xCoord - (box.minX + box.maxX) * 0.5D,
-               queryBottom + lift - box.minY, anchor.zCoord - (box.minZ + box.maxZ) * 0.5D);
-         double reach = 0.05D + lift;
-         return hasGroundSupport(box, this.getCollidingBoundingBoxes(this, box.addCoord(0, -reach, 0)), reach);
+         // Read the current accepted anchor, never a stale/predicted wheel box.
+         // Use suspension's block-shape and travel bounds for all civilian contacts.
+         double savedY = this.suspensionSupportY, savedLift = this.suspensionRequiredLift;
+         boolean supported = this.measureCompressionAt(anchor, info.suspensionTravel) >= 0;
+         this.suspensionSupportY = savedY; this.suspensionRequiredLift = savedLift;
+         return supported;
       }
       double bodyBottom = this.parents.getUnrotatedBodyFloor();
       double restGap = Math.max(0.0D, targetBottom - bodyBottom);

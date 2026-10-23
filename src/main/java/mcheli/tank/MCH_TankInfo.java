@@ -56,7 +56,7 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    public MCH_CarTireGrip.TireSize rearTireSize = null;
    public float carLateralGrip = MCH_CarTireGrip.DEFAULT_GRIP;
    public float carMinimumSteering = 0.0F;
-   /** Suspension acceleration at full compression, in blocks/tick squared. */
+   /** Spring acceleration span across travel, around gravity preload at half compression. */
    public float suspensionSpring = 0.055F;
    /** Damper acceleration per block/tick while the tire is compressing. */
    public float suspensionCompressionDamping = 0.035F;

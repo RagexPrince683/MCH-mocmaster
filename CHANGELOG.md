@@ -822,3 +822,25 @@ Developer/backend
   Cover the full native models in render bounds and retain server-owned casting and XF costs.
   Existing single-block saves keep their inventory/data but require manual replacement;
   never expand their footprint automatically into surrounding blocks.
+
+2026-10-22 21:36 — Correct shared civilian suspension and diagonal terrain response
+
+- Resolve actual wheel collision tops, distinguish overlapping over-compression
+  from unsupported droop, and route required chassis lift through full body sweeps
+  with present support and the shared existing step budget. Separate current and
+  predicted support; reconcile wheel placement/compression after accepted movement.
+- Fit pitch/roll jointly at transformed wheel footprints with bounded incomplete
+  contact handling; retain staircase walks, WeightedCenterZ balance, body clearance
+  and angle limits. Score diagonal travel by forward projection so clipping one
+  collision axis cannot discard permitted progress on the other.
+- Balance positive suspension stiffness against actual gravity at half travel,
+  averaged over configured wheels. Keep unsupported falling and correct damper
+  signs. Convert world-vertical render travel into model space around authored
+  wheel positions, replacing the learned neutral baseline.
+- Reconcile local-driver pitch/roll with server-accepted tilt and ignore civilian
+  client tilt indications while preserving responsive yaw and existing packets.
+  Non-civilian paths, drivetrain tuning, colliders and vehicle definitions remain
+  unchanged. Update existing suspension/contact documentation.
+- Offline compileJava succeeded; direct force/coordinate calculations and shared
+  Forge 1.7.10 side-safety source checks completed. Gameplay, multiplayer and
+  dedicated-server operation remain unverified; no new test infrastructure added.

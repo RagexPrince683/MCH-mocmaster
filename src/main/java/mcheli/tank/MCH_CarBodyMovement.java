@@ -244,11 +244,11 @@ final class MCH_CarBodyMovement {
                   && y < best.y - MCH_CarCollisionBox.EPSILON);
    }
 
-   /** Travel in the requested direction, with equal cost for unwanted sideways motion. */
+   /** Forward projection; clipping either world axis must not erase valid diagonal travel. */
    private static double progress(double x, double z, double requestedX, double requestedZ) {
       double length = Math.hypot(requestedX, requestedZ);
       return length <= MCH_CarCollisionBox.EPSILON ? 0
-            : (x * requestedX + z * requestedZ - Math.abs(x * requestedZ - z * requestedX)) / length;
+            : (x * requestedX + z * requestedZ) / length;
    }
 
    private static Horizontal horizontal(List<MCH_CarCollisionBox> initial, Collisions collisions,

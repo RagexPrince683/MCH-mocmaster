@@ -54,7 +54,10 @@ public class MCH_WheelManager {
       }
       boolean exists() { return minX <= maxX; }
    }
-   private double previousSuspensionBodyFloor = Double.NaN;
+   // Defined equilibrium; never learned from a slope, missing contact or a fall.
+   static final float SUSPENSION_REST = 0.5F;
+   private float terrainRoll = Float.NaN;
+   private boolean terrainHasAxles;
    private static Random rand = new Random();
 
    // per-wheel state (persist during runtime)
@@ -460,12 +463,15 @@ public class MCH_WheelManager {
    /** Civilian-car-only suspension. Collision and vertical force remain server authoritative. */
    private void moveCivilianSuspension(double x, double y, double z, MCH_TankInfo info) {
       MCH_EntityBaseVehicle car = this.parent;
+      if(car.worldObj.isRemote) {
+         for(MCH_EntityWheel wheel : this.wheels) {
+            if(wheel == null || wheel.isDead || wheel.pos == null) continue;
+            wheel.prevPosX = wheel.posX; wheel.prevPosY = wheel.posY; wheel.prevPosZ = wheel.posZ;
+            wheel.prevSuspensionCompression = wheel.suspensionCompression;
+         }
+         return;
+      }
       double travel = info.suspensionTravel;
-      double left = 0.0D;
-      double right = 0.0D;
-      int leftCount = 0;
-      int rightCount = 0;
-      int supported = 0;
       double totalResponse = 0.0D;
       SupportBounds support = new SupportBounds();
 
@@ -480,22 +486,11 @@ public class MCH_WheelManager {
          wheel.prevPosZ = wheel.posZ;
          wheel.prevSuspensionCompression = wheel.suspensionCompression;
 
-         Vec3 anchor = this.getTransformedPosition(wheel.pos.xCoord, wheel.pos.yCoord, wheel.pos.zCoord,
-               car, car.getRotYaw(), this.targetPitch, this.targetRoll);
+         Vec3 anchor = car.getTransformedPosition(wheel.pos);
          // Both footprints use the current vertical reference. Pending gravity is
          // not terrain compression and must not become the rendered rest baseline.
          Vec3 predicted = Vec3.createVectorHelper(anchor.xCoord + x, anchor.yCoord, anchor.zCoord + z);
          double measured = wheel.measureSuspensionCompression(anchor, predicted, travel);
-         float compression = (float)measured;
-         if(wheel.suspensionSupported && !wheel.suspensionCompressionInitialized) {
-            wheel.prevSuspensionCompression = compression;
-            wheel.suspensionCompressionRate = 0.0F;
-            wheel.suspensionCompressionInitialized = true;
-         } else {
-            float rawRate = compression - wheel.prevSuspensionCompression;
-            wheel.suspensionCompressionRate = wheel.suspensionCompressionRate * 0.35F + rawRate * 0.65F;
-         }
-         wheel.suspensionCompression = compression;
 
          if(wheel.suspensionCurrentSupported) {
             double halfX = (wheel.boundingBox.maxX - wheel.boundingBox.minX) * 0.5D;
@@ -504,60 +499,34 @@ public class MCH_WheelManager {
             support.add(wheel.pos.xCoord + halfX, wheel.pos.zCoord + halfZ);
          }
 
-         double wheelY = anchor.yCoord + wheel.getSuspensionAnchorOffset() - travel + measured;
-         wheel.setPosition(anchor.xCoord + x, wheelY, anchor.zCoord + z);
-
          if(!wheel.suspensionSupported) {
             continue;
          }
 
-         ++supported;
          double normalized = measured / travel;
          double damping = wheel.suspensionCompressionRate >= 0.0F
                ? info.suspensionCompressionDamping : info.suspensionReboundDamping;
-         double response = normalized * info.suspensionSpring + wheel.suspensionCompressionRate * damping;
-         totalResponse += MathHelper.clamp_double(response, -0.08D, 0.08D);
-
-         if(wheel.pos.xCoord >= 0.0D) {
-            right += wheel.suspensionSupportY;
-            ++rightCount;
-         } else {
-            left += wheel.suspensionSupportY;
-            ++leftCount;
-         }
+         // Each configured wheel carries 1/N of the actual downward load.
+         // Averaging N copies preserves the preload, rather than dividing it twice.
+         // Positive compression rate means the body is descending: damping pushes up.
+         totalResponse += (info.suspensionSpring > 0 ? ((MCH_EntityTank)car).carSuspensionLoad : 0)
+               + (normalized - SUSPENSION_REST) * info.suspensionSpring
+               + wheel.suspensionCompressionRate * damping;
       }
 
-      if(supported > 0) {
-         if(!car.worldObj.isRemote) {
-            double springAcceleration = totalResponse / this.wheels.length;
-            car.motionY += MathHelper.clamp_double(springAcceleration, -0.06D, 0.06D);
-         }
+      if(!car.worldObj.isRemote && this.wheels.length > 0) {
+         car.motionY += totalResponse / this.wheels.length;
       }
 
-      if(leftCount > 0 && rightCount > 0) {
-         double leftHeight = left / leftCount;
-         double rightHeight = right / rightCount;
-         double trackWidth = this.getTrackWidth();
-         float roll = (float)-Math.toDegrees(Math.atan2(rightHeight - leftHeight, trackWidth));
-         roll = MathHelper.clamp_float(roll, -18.0F, 18.0F);
-         float smoothing = car.worldObj.isRemote ? 0.28F : 0.45F;
-         this.targetRoll += (roll - this.targetRoll) * smoothing;
-         if(Math.abs(roll) < 0.01F && Math.abs(this.targetRoll) < 0.02F) {
-            this.targetRoll = 0.0F;
-         }
-      } else {
-         this.targetRoll *= 0.94F;
-         if(Math.abs(this.targetRoll) < 0.02F) this.targetRoll = 0;
-      }
-
-      // Terrain pitch is independent of suspension compression/contact, including on descent.
+      // A joint fit separates longitudinal and lateral slope on diagonal terrain.
       float terrainPitch = this.getCivilianTerrainPitch(x, z, info);
+      this.targetRoll = MCH_CarTerrainPitch.approach(this.targetRoll, this.terrainRoll, 0.45F);
       // Weight transfer around a narrow support applies when settling. While
       // driving, the pending tread heights must lead the pitch into a climb.
       // A real front/rear tread difference remains the pitch reference even if
       // a step briefly slows the car below the stationary balance threshold.
       if(Math.hypot(car.motionX, car.motionZ) < 0.03D
-            && (Float.isNaN(terrainPitch) || Math.abs(terrainPitch) < 0.01F)) {
+            && (!this.terrainHasAxles || Float.isNaN(terrainPitch) || Math.abs(terrainPitch) < 0.01F)) {
          if(!support.exists() && car instanceof MCH_EntityTank) {
             support = ((MCH_EntityTank)car).getCivilianBodySupportBounds();
          }
@@ -570,16 +539,7 @@ public class MCH_WheelManager {
          }
       }
       this.targetPitch = MCH_CarTerrainPitch.approach(this.targetPitch, terrainPitch,
-            car.worldObj.isRemote ? 0.28F : 0.45F);
-      this.updateRenderNeutral(supported, terrainPitch);
-
-      // This method runs every client tick, including while the local driver is stopped.
-      // Applying the predicted pose here prevents the last rendered terrain roll from
-      // waiting indefinitely for another steering/input angle update.
-      if(car.worldObj.isRemote) {
-         car.setRotPitch(this.targetPitch);
-         car.setRotRoll(this.targetRoll);
-      }
+            0.45F);
    }
 
    private static float tip(double center, double minimum, double maximum) {
@@ -590,7 +550,7 @@ public class MCH_WheelManager {
    }
 
    /** Reconcile predicted suspension with the accepted server body, without a second spring impulse. */
-   void settleCivilianWheels() {
+   public void settleCivilianWheels() {
       MCH_EntityBaseVehicle car = this.parent;
       MCH_TankInfo info = ((MCH_EntityTank)car).getTankInfo();
       this.targetPitch = car.getRotPitch();
@@ -599,6 +559,11 @@ public class MCH_WheelManager {
          if(wheel == null || wheel.isDead || wheel.pos == null) continue;
          Vec3 anchor = car.getTransformedPosition(wheel.pos);
          double compression = wheel.measureSuspensionCompression(anchor, anchor, info.suspensionTravel);
+         if(!wheel.suspensionCompressionInitialized) {
+            wheel.prevSuspensionCompression = (float)compression;
+            wheel.suspensionCompressionInitialized = true;
+         }
+         wheel.suspensionCompressionRate = (float)compression - wheel.prevSuspensionCompression;
          wheel.suspensionCompression = (float)compression;
          wheel.setPosition(anchor.xCoord, anchor.yCoord + wheel.getSuspensionAnchorOffset()
                - info.suspensionTravel + compression, anchor.zCoord);
@@ -641,21 +606,27 @@ public class MCH_WheelManager {
       // A blocked level-body probe is not evidence of level axle terrain. The
       // compound-body solver checks walls/headroom using the requested pose.
 
-      double front = 0.0D, rear = 0.0D, frontZ = 0.0D, rearZ = 0.0D;
+      double front = 0.0D, rear = 0.0D;
       int frontCount = 0, rearCount = 0;
       boolean axleFallback = false;
       boolean axleWalk = false;
+      MCH_CarTerrainPitch.Contacts contacts = new MCH_CarTerrainPitch.Contacts();
+      double yaw = Math.toRadians(car.getRotYaw());
       for(MCH_EntityWheel wheel : this.wheels) {
          if(wheel == null || wheel.isDead || wheel.pos == null) continue;
-         // Yaw-only locations avoid feeding suspension extension or the previous pitch back
-         // into horizontal terrain selection. This is the pending body's wheel footprint.
-         double height = this.walkCivilianTerrainHeight(wheel.pos.xCoord, 0,
-               wheel.pos.zCoord, x, z, referenceY, step, clearance);
+         // Use each transformed anchor's footprint, expressed in the yaw frame.
+         // Suspension extension never changes X/Z along the world-vertical axis.
+         Vec3 anchor = car.getTransformedPosition(wheel.pos);
+         double dx = anchor.xCoord - car.posX, dz = anchor.zCoord - car.posZ;
+         double localX = dx * Math.cos(yaw) + dz * Math.sin(yaw);
+         double localZ = -dx * Math.sin(yaw) + dz * Math.cos(yaw);
+         double height = this.walkCivilianTerrainHeight(localX, 0,
+               localZ, x, z, referenceY, step, clearance);
          if(Double.isNaN(height)) {
             // Any gap in the walk, including an intermediate column, must still
             // allow an independently reachable axle surface. Do not reuse the last
             // tread's height as support across the gap.
-            height = this.sampleCivilianTerrainHeight(wheel.pos.xCoord, wheel.pos.zCoord,
+            height = this.sampleCivilianTerrainHeight(localX, localZ,
                   x, z, referenceY, step, clearance);
             axleFallback |= !Double.isNaN(height);
          }
@@ -665,15 +636,16 @@ public class MCH_WheelManager {
             // real treads back from that axle, bounding every local height change.
             double otherZ = wheel.pos.zCoord >= (this.minZ + this.maxZ) * 0.5D
                   ? this.minZ : this.maxZ;
-            height = this.walkCivilianTerrainHeight(wheel.pos.xCoord, otherZ,
-                  wheel.pos.zCoord, x, z, referenceY, step, clearance);
+            height = this.walkCivilianTerrainHeight(localX, otherZ,
+                  localZ, x, z, referenceY, step, clearance);
             axleWalk |= !Double.isNaN(height);
          }
          if(Double.isNaN(height)) continue;
+         contacts.add(localX, localZ, height);
          if(wheel.pos.zCoord >= this.weightedCenter.zCoord) {
-            front += height; frontZ += wheel.pos.zCoord; ++frontCount;
+            front += height; ++frontCount;
          } else {
-            rear += height; rearZ += wheel.pos.zCoord; ++rearCount;
+            rear += height; ++rearCount;
          }
       }
       if(trace != null) {
@@ -681,10 +653,16 @@ public class MCH_WheelManager {
          trace.front = frontCount > 0 ? front / frontCount : Double.NaN;
          trace.rear = rearCount > 0 ? rear / rearCount : Double.NaN;
       }
-      if(frontCount == 0 || rearCount == 0) return Float.NaN;
-      float pitch = MCH_CarTerrainPitch.angle(front / frontCount, rear / rearCount,
-            frontZ / frontCount - rearZ / rearCount);
-      if(trace != null) { trace.reason = axleWalk ? "sampled_axle_walk"
+      float[] pose = contacts.orientation(car.getRotPitch(), car.getRotRoll());
+      this.terrainHasAxles = frontCount > 0 && rearCount > 0;
+      // Incomplete terrain constrains fewer directions. Bound its influence without
+      // inserting zero-height contacts or assuming the missing wheels share a plane.
+      float available = this.wheels.length > 0 ? (float)contacts.count / this.wheels.length : 0;
+      if(!Float.isNaN(pose[0])) pose[0] = car.getRotPitch() + (pose[0] - car.getRotPitch()) * available;
+      if(!Float.isNaN(pose[1])) pose[1] = car.getRotRoll() + (pose[1] - car.getRotRoll()) * available;
+      this.terrainRoll = pose[1];
+      float pitch = pose[0];
+      if(trace != null) { trace.reason = contacts.count == 0 ? "missing_axle" : axleWalk ? "sampled_axle_walk"
             : axleFallback ? "sampled_fallback" : "sampled"; trace.pitch = pitch; }
       return pitch;
    }
@@ -733,61 +711,6 @@ public class MCH_WheelManager {
       return boxes;
    }
 
-   /**
-    * Establishes rendered neutral travel only with a settled level pose and complete
-    * support on one collision-surface plane at the body floor. Equal compression alone
-    * cannot distinguish level ground from saturated suspension on uneven terrain.
-    */
-   private void updateRenderNeutral(int supported, float terrainPitch) {
-      double bodyFloor = this.parent.getUnrotatedBodyFloor();
-      boolean settledHeight = !Double.isNaN(this.previousSuspensionBodyFloor)
-            && Math.abs(bodyFloor - this.previousSuspensionBodyFloor) < 0.001D;
-      this.previousSuspensionBodyFloor = bodyFloor;
-      if(!settledHeight || supported != this.wheels.length || supported == 0 || Float.isNaN(terrainPitch)
-            || Math.abs(terrainPitch) > 0.01F || Math.abs(this.targetPitch) > 0.02F
-            || Math.abs(this.targetRoll) > 0.02F) {
-         return;
-      }
-
-      float minimum = Float.POSITIVE_INFINITY;
-      float maximum = Float.NEGATIVE_INFINITY;
-      double minimumHeight = Double.POSITIVE_INFINITY;
-      double maximumHeight = Double.NEGATIVE_INFINITY;
-      for(MCH_EntityWheel wheel : this.wheels) {
-         if(Double.isNaN(wheel.suspensionSupportY)
-               || Math.abs(wheel.suspensionSupportY - bodyFloor) > 0.05D) return;
-         minimum = Math.min(minimum, wheel.suspensionCompression);
-         maximum = Math.max(maximum, wheel.suspensionCompression);
-         minimumHeight = Math.min(minimumHeight, wheel.suspensionSupportY);
-         maximumHeight = Math.max(maximumHeight, wheel.suspensionSupportY);
-      }
-      if(maximum - minimum > 0.02F || maximumHeight - minimumHeight > 0.02D) {
-         return;
-      }
-
-      for(MCH_EntityWheel wheel : this.wheels) {
-         if(Float.isNaN(wheel.suspensionRestCompression)
-               || Math.abs(wheel.suspensionCompression - wheel.suspensionRestCompression) < 0.001F) {
-            wheel.suspensionRestCompression = wheel.suspensionCompression;
-         } else {
-            wheel.suspensionRestCompression +=
-                  (wheel.suspensionCompression - wheel.suspensionRestCompression) * 0.2F;
-         }
-      }
-   }
-
-   private double getTrackWidth() {
-      double minX = Double.POSITIVE_INFINITY;
-      double maxX = Double.NEGATIVE_INFINITY;
-      for(MCH_EntityWheel wheel : this.wheels) {
-         if(wheel != null && wheel.pos != null) {
-            minX = Math.min(minX, wheel.pos.xCoord);
-            maxX = Math.max(maxX, wheel.pos.xCoord);
-         }
-      }
-      return minX <= maxX ? Math.max(0.5D, maxX - minX) : 1.0D;
-   }
-
    public float getRenderWheelTravel(double x, double z, float tickTime) {
       MCH_EntityWheel closest = null;
       double closestDistance = Double.POSITIVE_INFINITY;
@@ -809,8 +732,31 @@ public class MCH_WheelManager {
       }
       float compression = closest.prevSuspensionCompression
             + (closest.suspensionCompression - closest.prevSuspensionCompression) * tickTime;
-      return Float.isNaN(closest.suspensionRestCompression)
-            ? 0.0F : compression - closest.suspensionRestCompression;
+      float travel = ((MCH_EntityTank)this.parent).getTankInfo().suspensionTravel;
+      return MathHelper.clamp_float(compression, 0, travel) - travel * SUSPENSION_REST;
+   }
+
+   /** World-vertical suspension displacement expressed in the interpolated model frame. */
+   public Vec3 getRenderSuspensionAxis(float tickTime) {
+      float yaw = this.parent.calcRotYaw(tickTime);
+      float pitch = this.parent.calcRotPitch(tickTime);
+      float roll = this.parent.calcRotRoll(tickTime);
+      Vec3 right = MCH_Lib.RotVec3(1, 0, 0, -yaw, -pitch, -roll);
+      Vec3 up = MCH_Lib.RotVec3(0, 1, 0, -yaw, -pitch, -roll);
+      Vec3 forward = MCH_Lib.RotVec3(0, 0, 1, -yaw, -pitch, -roll);
+      return Vec3.createVectorHelper(right.yCoord, up.yCoord, forward.yCoord);
+   }
+
+   /** No support is inferred here; a bounded lift still requires present body/wheel contact. */
+   double getCivilianSuspensionLift() {
+      double lift = 0;
+      for(MCH_EntityWheel wheel : this.wheels) {
+         if(wheel == null || wheel.isDead || wheel.pos == null) continue;
+         Vec3 anchor = this.parent.getTransformedPosition(wheel.pos);
+         wheel.measureSuspensionCompression(anchor, anchor, ((MCH_EntityTank)this.parent).getTankInfo().suspensionTravel);
+         lift = Math.max(lift, wheel.suspensionRequiredLift);
+      }
+      return lift;
    }
 
 

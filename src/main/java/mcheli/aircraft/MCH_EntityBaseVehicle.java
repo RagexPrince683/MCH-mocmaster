@@ -3914,6 +3914,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return 40.0F;
    }
 
+   /** Civilian chassis tilt is accepted by the server's body collision solver. */
+   public boolean usesServerTerrainPose() { return false; }
+
    public void applyServerPositionAndRotation() {
       double increment = (double) this.aircraftPosRotInc;
 
@@ -3937,6 +3940,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.setRotRoll(newRotRoll);
 
          //System.out.println("  New Rotations: Yaw=" + newRotYaw + ", Pitch=" + newRotPitch + ", Roll=" + newRotRoll);
+      } else if(this.usesServerTerrainPose()) {
+         // Keep local steering responsive, while reconciling collision-rejected tilt.
+         this.setRotPitch((float)(this.getRotPitch() + (this.aircraftPitch - this.getRotPitch()) / increment));
+         this.setRotRoll((float)(this.getRotRoll() + rollDiff / increment));
       }
 
       // Smooth position interpolation

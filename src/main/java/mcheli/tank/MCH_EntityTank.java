@@ -4,7 +4,6 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.Iterator;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
@@ -63,6 +62,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    private float carPhysicsYaw;
    private boolean carBodyPoseInitialized;
    private float carBodyYaw, carBodyPitch, carBodyRoll;
+   double carSuspensionLoad;
    private double carDiagnosticDriveForce;
    private MCH_WheelManager.CarContact carDiagnosticDriveContact;
    int wheelDebugTick = -1;
@@ -533,8 +533,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          double poseRise = 0;
          if(!super.worldObj.isRemote) {
             CivilianPose pose = this.resolveCivilianPose(collisions, civilianTrace);
-            civilianPoseY = pose.y;
-            poseRise = pose.rise;
+            double suspensionRise = this.resolveCivilianSuspensionLift(collisions,
+                  Math.max(0, super.stepHeight - pose.rise));
+            civilianPoseY = suspensionRise + pose.y;
+            poseRise = suspensionRise + pose.rise;
          }
          final float startPitch = this.getRotPitch(), startRoll = this.getRotRoll();
          final MCH_CarBodyMovement.Trace rotationTrace = civilianTrace;
@@ -776,6 +778,21 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       return new CivilianPose(0, 0);
    }
 
+   /** Saturated wheel support can request lift, but cannot teleport or ground the chassis. */
+   private double resolveCivilianSuspensionLift(MCH_CarBodyMovement.Collisions collisions, double riseBudget) {
+      double requested = this.WheelMng.getCivilianSuspensionLift();
+      if(requested <= 0 || requested > super.stepHeight) return 0;
+      List<MCH_CarCollisionBox> body = this.carBodyAt(this.getRotYaw(), this.getRotPitch(), this.getRotRoll(), 0, 0);
+      if(!MCH_CarBodyMovement.clear(body, collisions)
+            || !(MCH_CarBodyMovement.supportedBody(body, collisions)
+                  || this.hasCurrentCivilianWheelSupport(collisions))) return 0;
+      double rise = MCH_CarBodyMovement.move(body, collisions, 1,
+            Math.min(requested, Math.min(0.1D, riseBudget)));
+      super.posY += rise;
+      this.updateCarPrimaryBounds();
+      return rise;
+   }
+
    /** Read-only raised pose candidate, at either end of the checked horizontal sweep. */
    private List<MCH_CarCollisionBox> civilianStepRotation(MCH_CarBodyMovement.Collisions collisions,
          double x, double y, double z, float pitch, float roll, float pitchDelta, float rollDelta,
@@ -827,19 +844,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    /** Read-only support at the present axle footprint, never at the pending destination. */
    private boolean hasCurrentCivilianWheelSupport(MCH_CarBodyMovement.Collisions collisions) {
       if(this.WheelMng == null || this.WheelMng.wheels == null) return false;
-      double travel = this.getTankInfo().suspensionTravel;
       for(MCH_EntityWheel wheel : this.WheelMng.wheels) {
          if(wheel == null || wheel.isDead || wheel.pos == null || wheel.boundingBox == null) continue;
-         Vec3 anchor = this.getTransformedPosition(wheel.pos);
-         double anchorBottom = anchor.yCoord + wheel.getSuspensionAnchorOffset()
-               + wheel.boundingBox.minY - wheel.posY;
-         // Reject wheels left below the body during takeoff, even if their flags say grounded.
-         if(wheel.boundingBox.minY < anchorBottom - travel - 1.0E-5D
-               || wheel.boundingBox.minY > anchorBottom + 1.0E-5D) continue;
-         AxisAlignedBB present = wheel.boundingBox.copy();
-         present.offset(anchor.xCoord - (present.minX + present.maxX) * 0.5D, 0,
-               anchor.zCoord - (present.minZ + present.maxZ) * 0.5D);
-         if(MCH_CarBodyMovement.supported(Collections.singletonList(present), collisions)) return true;
+         if(wheel.hasCarGroundContact()) return true;
       }
       return false;
    }
@@ -879,8 +886,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          }
 
          this.updateRecoil(partialTicks);
-         this.setRotPitch(this.getRotPitch() + (this.WheelMng.targetPitch - this.getRotPitch()) * partialTicks);
-         this.setRotRoll(this.getRotRoll() + (this.WheelMng.targetRoll - this.getRotRoll()) * partialTicks);
+         if(this.getTankInfo() == null || !this.getTankInfo().civilianCarGrip) {
+            this.setRotPitch(this.getRotPitch() + (this.WheelMng.targetPitch - this.getRotPitch()) * partialTicks);
+            this.setRotRoll(this.getRotRoll() + (this.WheelMng.targetRoll - this.getRotRoll()) * partialTicks);
+         }
          boolean isFly = MCH_Lib.getBlockIdY(this, 3, -3) == 0;
          //System.out.println("isfly" + isFly);
 
@@ -1493,7 +1502,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 //      }
 
       MCH_TankInfo info = this.getTankInfo();
-      boolean useCarGrip = info != null && info.civilianCarGrip && info.carLateralGrip > 0.0F;
+      boolean useCarGrip = info != null && info.civilianCarGrip;
       if(useCarGrip) {
          // The server advances the wheels before it advances the vehicle body. Keep car
          // prediction in the same order so both sides probe the same suspension state.
@@ -1502,6 +1511,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       if(super.aircraftPosRotInc > 0) {
          this.applyServerPositionAndRotation();
       } else {
+         if(useCarGrip) {
+            // Roll metadata can change while position/yaw/pitch tracking is idle.
+            this.setRotRoll(this.getRotRoll() + MathHelper.wrapAngleTo180_float(
+                  this.getServerRoll() - this.getRotRoll()) * 0.28F);
+         }
          // Use the same reverse clamp for client extrapolation. Server interpolation
          // above continues to follow authoritative positions without locally clipping them.
          this.applyCivilianCarReverseSpeedLimit(this.getAcInfo().enableBack && super.throttleBack > 0.0F);
@@ -1529,6 +1543,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
       if(!useCarGrip) {
          this.updateWheels();
+      } else {
+         // Snapshot above belongs to the previous displayed body; this compression
+         // belongs to the newly interpolated/extrapolated authoritative pose.
+         this.WheelMng.settleCivilianWheels();
       }
       this.onUpdate_Particle2();
       if(this.hasCarDrivetrain()) {
@@ -1546,6 +1564,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    }
 
    public void applyOnGroundPitch(float factor) {}
+
+   @Override
+   public boolean usesServerTerrainPose() {
+      return this.tankInfo != null && this.tankInfo.civilianCarGrip;
+   }
 
 
    private void onUpdate_Server() {
@@ -1599,6 +1622,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // --------------------------------------------------
       // THRUST (ACCEL ONLY, NOT SPEED)
       // --------------------------------------------------
+      this.carSuspensionLoad = Math.max(0, motionYBeforeGravity - super.motionY);
       float throttle = (float)(this.getCurrentThrottle() / 10.0D);
       Vec3 v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - 10.0F);
       double driveScale = 1.0D;
